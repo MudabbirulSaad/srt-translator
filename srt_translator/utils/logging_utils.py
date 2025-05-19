@@ -54,8 +54,15 @@ def setup_logging(log_file: Optional[str] = None, verbose: bool = False) -> logg
     
     # Create file handler if log file is specified or generate a default log file
     if log_file is None:
+        # Get the project root directory
+        project_root = get_project_root()
+        
+        # Create logs directory path
+        logs_dir = os.path.join(project_root, "logs")
+        
+        # Generate timestamp for log file name
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        log_file = os.path.join(os.getcwd(), f"srt_translator_{timestamp}.log")
+        log_file = os.path.join(logs_dir, f"srt_translator_{timestamp}.log")
     
     try:
         # Create directory for log file if it doesn't exist
@@ -75,3 +82,18 @@ def setup_logging(log_file: Optional[str] = None, verbose: bool = False) -> logg
         logger.error(f"Failed to set up file logging: {e}")
     
     return logger
+
+def get_project_root() -> str:
+    """
+    Get the absolute path to the project root directory.
+    
+    Returns:
+        Absolute path to the project root directory
+    """
+    # Start with the directory of this file
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    
+    # Go up two levels to get to the project root (from utils/ to srt_translator/)
+    project_root = os.path.dirname(os.path.dirname(current_dir))
+    
+    return project_root

@@ -25,6 +25,9 @@ ENV/
 # Log files
 *.log
 srt_translator_*.log
+# Keep logs directory but ignore its contents
+logs/*
+!logs/.gitkeep
 
 # Temporary files
 *.tmp
