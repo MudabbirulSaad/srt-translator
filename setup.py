@@ -36,7 +36,16 @@ setup(
         "colorama>=0.4.6",
         "pydantic>=2.0.0",
         "tqdm>=4.66.0",
+        "ollama>=0.1.6",
     ],
+    extras_require={
+        "transcribe": [
+            "openai-whisper>=20240930",
+            "ffmpeg-python>=0.2.0",
+            "torch>=2.0.0",
+            "numpy>=1.20.0",
+        ],
+    },
     entry_points={
         "console_scripts": [
             "srt-translator=srt_translator.cli:main",

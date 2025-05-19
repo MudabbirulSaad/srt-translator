@@ -55,7 +55,7 @@ def read_srt_file(file_path: str) -> List[srt.Subtitle]:
 
 def write_srt_file(subtitles: List[srt.Subtitle], file_path: str) -> None:
     """
-    Write subtitles to SRT file.
+    Write subtitles to SRT file with proper encoding for special characters.
     
     Args:
         subtitles: List of SRT subtitle objects
@@ -67,9 +67,37 @@ def write_srt_file(subtitles: List[srt.Subtitle], file_path: str) -> None:
         # Create directory if it doesn't exist
         os.makedirs(os.path.dirname(os.path.abspath(file_path)), exist_ok=True)
         
-        # Write subtitles to file
-        with open(file_path, 'w', encoding='utf-8') as f:
-            f.write(srt.compose(subtitles))
+        # Fix encoding issues in subtitle content
+        fixed_subtitles = []
+        for subtitle in subtitles:
+            # Create a copy of the subtitle to avoid modifying the original
+            fixed_subtitle = srt.Subtitle(
+                index=subtitle.index,
+                start=subtitle.start,
+                end=subtitle.end,
+                content=subtitle.content,
+                proprietary=subtitle.proprietary
+            )
+            
+            # Fix common encoding issues for Spanish characters
+            if isinstance(fixed_subtitle.content, str):
+                # Map of problematic characters to their correct form
+                char_map = {
+                    'Ã¡': 'á', 'Ã©': 'é', 'Ã­': 'í', 'Ã³': 'ó', 'Ãº': 'ú',
+                    'Ã±': 'ñ', 'Ã¼': 'ü', 'Ã': 'í', 'Â': '',
+                    'Ã\x81': 'Á', 'Ã\x89': 'É', 'Ã\x8d': 'Í', 'Ã\x93': 'Ó', 'Ã\x9a': 'Ú',
+                    'Ã\x91': 'Ñ'
+                }
+                
+                # Apply all character replacements
+                for bad_char, good_char in char_map.items():
+                    fixed_subtitle.content = fixed_subtitle.content.replace(bad_char, good_char)
+            
+            fixed_subtitles.append(fixed_subtitle)
+        
+        # Write subtitles to file with UTF-8 encoding
+        with open(file_path, 'w', encoding='utf-8-sig') as f:
+            f.write(srt.compose(fixed_subtitles))
         
         logger.info(f"Translated subtitles written to {file_path}")
     except Exception as e:

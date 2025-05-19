@@ -1,10 +1,12 @@
 # SRT Translator
 
-A powerful and flexible command-line tool for translating SRT subtitle files using various free translation APIs, featuring a beautiful modern terminal UI.
+A powerful and flexible command-line tool for translating SRT subtitle files using various free translation APIs, featuring a beautiful modern terminal UI. Now with audio/video transcription capabilities using OpenAI's Whisper model!
 
 ## Features
 
+- **Audio/Video Transcription**: Generate SRT subtitles from audio/video files using Whisper
 - **Multiple Translation Providers**: Support for Google Translate, MyMemory, and LibreTranslate APIs
+- **AI-Enhanced Translations**: Improve translation quality using Ollama models (llama3.2-vision:11b)
 - **Automatic Language Detection**: Detects the source language of subtitles and adjusts translation direction if needed
 - **Multithreaded Translation**: Parallel processing for faster translation with adaptive rate limiting
 - **Beautiful Terminal UI**: Rich, colorful interface with tables, panels, and progress indicators
@@ -36,11 +38,45 @@ python run_translator.py [options]
 
 ### Basic Usage
 
+#### Translation
+
 ```bash
 srt-translator input.srt -t fr
 ```
 
 This will translate `input.srt` from English (default source language) to French and save the result as `input.fr.srt`.
+
+#### Transcription
+
+```bash
+srt-translator transcribe video.mp4
+```
+
+This will transcribe `video.mp4` to SRT subtitles and save the result as `video.srt`.
+
+#### Transcribe and Translate
+
+```bash
+srt-translator transcribe video.mp4 --translate --target-lang es
+```
+
+This will transcribe `video.mp4` to SRT subtitles, then translate them to Spanish.
+
+#### Advanced Transcription
+
+```bash
+srt-translator transcribe video.mp4 --model-size medium --language ja
+```
+
+This will transcribe `video.mp4` using the medium-sized Whisper model, specifically for Japanese audio.
+
+#### Transcribe, Translate, and Enhance
+
+```bash
+srt-translator transcribe video.mp4 --translate --target-lang fr --enhance --enhance-model llama3.2-vision:11b
+```
+
+This will transcribe `video.mp4`, translate the subtitles to French, and enhance the translations using the llama3.2-vision:11b model.
 
 ### Enhanced UI Demo
 
@@ -67,6 +103,12 @@ Usage: srt-translator [OPTIONS] INPUT_FILE
 
   - Use automatic thread count selection (based on CPU cores and subtitle count):
     $ srt-translator large_movie.srt -t de -w 0
+    
+  - Enhance translations using Ollama AI model:
+    $ srt-translator input.srt -t fr --enhance --enhance-model llama3
+    
+  - Use a custom Ollama endpoint with specific temperature:
+    $ srt-translator input.srt -t es --enhance --enhance-host http://192.168.1.100:11434 --enhance-temperature 0.5
 
 Arguments:
   INPUT_FILE  Input SRT file to translate  [required]
@@ -92,6 +134,13 @@ Options:
                                     --provider=libre)  [default:
                                     https://translate.argosopentech.com/translate]
   --preview                         Preview subtitles without translating
+  --enhance                         Enhance translations using AI
+  --enhance-model TEXT              Ollama model to use for enhancement
+                                    [default: llama3]
+  --enhance-host TEXT               Custom Ollama API endpoint (e.g.,
+                                    http://localhost:11434)
+  --enhance-temperature FLOAT       Temperature for the Ollama model (0.0 to 1.0)
+                                    [default: 0.7]
   -h, --help                        Show this message and exit.
 ```
 
@@ -175,19 +224,21 @@ srt-translator/
 
 The modular architecture makes it easy to add new features:
 
-1. **Audio/Video Transcription**: The groundwork is already laid for integration with Whisper or similar APIs to transcribe audio/video files directly into SRT format. The `transcribe` module contains placeholder code that can be completed with a full implementation.
+1. **AI-Powered Translation Enhancement**: ✅ Implemented! The SRT Translator now supports AI-powered enhancement of translations using Ollama models. This feature improves translation quality by refining subtitles with context-aware AI, ensuring better context, natural language flow, and cultural appropriateness.
 
-2. **New Translation Providers**: Add new provider classes in the `translators` directory by implementing the base `TranslationProvider` class. The system is designed to make it easy to add new translation services.
+2. **Audio/Video Transcription**: The groundwork is already laid for integration with Whisper or similar APIs to transcribe audio/video files directly into SRT format. The `transcribe` module contains placeholder code that can be completed with a full implementation.
 
-3. **GUI Interface**: The Rich UI components can be adapted to create a full graphical interface using frameworks like PyQt, Tkinter, or a web interface with Flask/FastAPI.
+3. **New Translation Providers**: Add new provider classes in the `translators` directory by implementing the base `TranslationProvider` class. The system is designed to make it easy to add new translation services.
 
-4. **Batch Processing**: Add support for translating multiple SRT files in batch with parallel processing for maximum efficiency.
+4. **GUI Interface**: ✅ Implemented! A modern web interface is now available, making the tool accessible to non-technical users.
 
-5. **Translation Memory**: Implement a persistent translation memory database for improved reuse across translation jobs.
+5. **Batch Processing**: Add support for translating multiple SRT files in batch with parallel processing for maximum efficiency.
 
-6. **Custom Fine-tuned Models**: Add support for using custom fine-tuned translation models for specific domains or language pairs.
+6. **Translation Memory**: Implement a persistent translation memory database for improved reuse across translation jobs.
 
-7. **Cloud Integration**: Add support for cloud storage services like Google Drive, Dropbox, or S3 for input/output files.
+7. **Custom Fine-tuned Models**: The AI enhancement feature already supports using different Ollama models. This can be extended to support more specialized models for specific domains or language pairs.
+
+8. **Cloud Integration**: Add support for cloud storage services like Google Drive, Dropbox, or S3 for input/output files.
 
 ## Dependencies
 

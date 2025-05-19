@@ -3,7 +3,9 @@
 
 """
 Transcription module for SRT Translator.
-This module will provide functionality to transcribe audio/video files to SRT.
+This module provides functionality to transcribe audio/video files to SRT using Whisper.
 """
 
-__all__ = []
+from .whisper_transcriber import WhisperTranscriber, transcribe_to_srt
+
+__all__ = ["WhisperTranscriber", "transcribe_to_srt"]

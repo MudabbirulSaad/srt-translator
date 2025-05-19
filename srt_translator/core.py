@@ -13,6 +13,7 @@ from typing import List, Dict, Any, Optional, Tuple
 import srt
 
 from .translators.base import TranslationProvider
+from .enhancers.base import EnhancementProvider
 from .utils.progress import ProgressBar
 from .utils.text import detect_language, normalize_language_code, extract_text_for_language_detection
 
@@ -24,7 +25,8 @@ def translate_subtitles(
     translator: TranslationProvider, 
     max_workers: int = 5,
     batch_size: int = 5,
-    progress_callback=None
+    progress_callback=None,
+    enhancer: Optional[EnhancementProvider] = None
 ) -> List[srt.Subtitle]:
     """
     Translate subtitles using multithreading.
@@ -98,10 +100,42 @@ def translate_subtitles(
                 elif progress_bar:
                     progress_bar.update(completed_count)
     
-    # Calculate and log statistics
+    # Calculate and log translation statistics
     elapsed_time = time.time() - start_time
     logger.info(f"Translation completed in {elapsed_time:.1f}s")
     logger.info(f"Average speed: {len(subtitles) / elapsed_time:.2f} subtitles/second")
+    
+    # Apply AI enhancement if enhancer is provided
+    if enhancer:
+        logger.info(f"Enhancing translations using {enhancer.get_provider_name()} provider...")
+        
+        # Reset progress tracking for enhancement
+        completed_count = 0
+        
+        # Create a new progress callback specifically for enhancement
+        def enhancement_progress_callback(current, total):
+            if progress_callback:
+                # Make sure we don't exceed 100%
+                current_value = min(current, total)
+                progress_callback(current_value, total)
+        
+        # Start timing for enhancement
+        enhance_start_time = time.time()
+        
+        # Enhance the translated subtitles
+        enhanced_subtitles = enhancer.enhance_batch(
+            subtitles=translated_subtitles,
+            batch_size=batch_size,
+            progress_callback=enhancement_progress_callback
+        )
+        
+        # Replace translated subtitles with enhanced ones
+        translated_subtitles = enhanced_subtitles
+        
+        # Calculate and log enhancement statistics
+        enhance_elapsed_time = time.time() - enhance_start_time
+        logger.info(f"Enhancement completed in {enhance_elapsed_time:.1f}s")
+        logger.info(f"Average enhancement speed: {len(subtitles) / enhance_elapsed_time:.2f} subtitles/second")
     
     return translated_subtitles
 

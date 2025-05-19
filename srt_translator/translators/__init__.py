@@ -22,14 +22,30 @@ TRANSLATOR_REGISTRY: Dict[str, Type[TranslationProvider]] = {
     "libre": LibreTranslator
 }
 
-def get_translator(provider: str, source_lang: str, target_lang: str) -> TranslationProvider:
-    """Factory function to get the appropriate translator"""
+def get_translator(provider: str, source_lang: str, target_lang: str, **kwargs) -> TranslationProvider:
+    """
+    Factory function to get the appropriate translator
+    
+    Args:
+        provider: Translation provider name (google, mymemory, libre)
+        source_lang: Source language code (ISO 639-1)
+        target_lang: Target language code (ISO 639-1)
+        **kwargs: Additional provider-specific parameters
+            - libre_url: URL for LibreTranslate API (only for libre provider)
+    
+    Returns:
+        TranslationProvider instance
+    """
     if provider not in TRANSLATOR_REGISTRY:
         logger.error(f"Unknown provider: {provider}. Available providers: {', '.join(TRANSLATOR_REGISTRY.keys())}")
         raise ValueError(f"Unknown provider: {provider}")
     
     try:
-        return TRANSLATOR_REGISTRY[provider](source_lang, target_lang)
+        # Handle provider-specific parameters
+        if provider == "libre" and "libre_url" in kwargs:
+            return LibreTranslator(source_lang, target_lang, api_url=kwargs["libre_url"])
+        else:
+            return TRANSLATOR_REGISTRY[provider](source_lang, target_lang)
     except ValueError as e:
         logger.error(str(e))
         logger.info("Falling back to Google Translator which doesn't require an API key")
