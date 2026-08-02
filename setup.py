@@ -14,7 +14,6 @@ setup(
     name="srt-translator",
     version="1.0.0",
     author="SRT Translator Team",
-    author_email="mudabbirulsaad@gmail.com",
     description="A CLI tool to translate SRT subtitle files using free translation APIs",
     long_description=long_description,
     long_description_content_type="text/markdown",
